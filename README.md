@@ -81,7 +81,9 @@ The tool is very simple in its operation and is driven by arguments:
 - Passive ARP: Detecting hosts in a segment using Passive ARP
 
 ```
-usage: above.py [-h] [--interface INTERFACE] [--timer TIMER] [--output OUTPUT] [--input INPUT] [--passive-arp]
+usage: above.py [-h] [--interface INTERFACE] [--timer TIMER] [--output OUTPUT] [--input INPUT] [--passive-arp] [--MACSec] [--EAPOL] [--ARP] [--CDP] [--DTP] [--LLDP] [--VLAN] [--S7COMM]
+                [--OMRON] [--TACACS] [--ModbusTCP] [--STP] [--OSPF] [--EIGRP] [--BGP] [--VRRP] [--VRRPv3] [--HSRP] [--GLBP] [--IGMP] [--LLMNR] [--NBT_NS] [--MDNS] [--DHCP] [--DHCPv6]
+                [--ICMPv6] [--SSDP] [--MNDP]
 
 options:
   -h, --help            show this help message and exit
