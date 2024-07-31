@@ -720,7 +720,6 @@ def main():
         print("[+] Host discovery using Passive ARP\n")
         sniff(iface=args.interface, timeout=args.timer, prn=passive_arp_monitor, store=0)
     elif args.interface:
-        print("-----------------------------------------------------------------------------------------")
         print("[+] Start sniffing...\n")
         print("[*] After the protocol is detected - all necessary information about it will be displayed")
         sniff(iface=args.interface, timeout=args.timer if args.timer is not None else None, prn=lambda x: packet_detection(x, args), store=0)
