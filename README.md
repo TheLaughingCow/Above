@@ -1,5 +1,6 @@
-# This is a development project for my own personal use,
-# find the stable main project here https://github.com/casterbyte/Above.
+# Find the stable main project here https://github.com/casterbyte/Above.
+# This one is a development project for my own personal use.
+
 
 # Above
 
