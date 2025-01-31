@@ -1101,7 +1101,6 @@ def main():
     # Individual protocol flags
     parser.add_argument('--MACSec', action='store_true', help='Capture MACSec packets')
     parser.add_argument('--EAPOL', action='store_true', help='Capture EAPOL packets')
-    parser.add_argument('--ARP', action='store_true', help='Capture ARP packets')
     parser.add_argument('--CDP', action='store_true', help='Capture CDP packets')
     parser.add_argument('--DTP', action='store_true', help='Capture DTP packets')
     parser.add_argument('--LLDP', action='store_true', help='Capture LLDP packets')
@@ -1145,7 +1144,7 @@ def main():
     signal.signal(signal.SIGINT, signal_handler)
 
     all_flags = [
-        'MACSec', 'EAPOL', 'ARP', 'CDP', 'DTP', 'LLDP', 'VLAN', 'S7COMM', 'OMRON', 'TACACS', 'ModbusTCP', 'STP',
+        'MACSec', 'EAPOL', 'CDP', 'DTP', 'LLDP', 'VLAN', 'S7COMM', 'OMRON', 'TACACS', 'ModbusTCP', 'STP',
         'OSPF', 'EIGRP', 'BGP', 'VRRP', 'VRRPv3', 'HSRP', 'GLBP', 'IGMP', 'LLMNR', 'NBT_NS', 'MDNS', 'DHCP',
         'DHCPv6', 'ICMPv6', 'SSDP', 'MNDP', 'SNMP', 'RADIUS'
     ]
