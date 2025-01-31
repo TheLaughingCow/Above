@@ -1071,22 +1071,19 @@ packets = []
 # Passive ARP
 def passive_arp_monitor(packet):
     if packet.haslayer(ARP):
-        # Récupération du type d'opération ARP
+
         arp_op = packet[ARP].op
         op_type = "Request" if arp_op == 1 else "Reply" if arp_op == 2 else "Unknown"
 
-        # Création d'une clé unique pour le paquet ARP
         ip_src = packet[ARP].psrc
         mac_src = packet[ARP].hwsrc
         packet_key_ARP = f"{ip_src}-{mac_src}-{op_type}"
 
-        # Vérification des doublons
         if packet_key_ARP in seen_packets["ARP"]:
-            return  # Ignorer les doublons
+            return
 
-        seen_packets["ARP"].add(packet_key_ARP)  # Ajouter à la liste des paquets déjà vus
+        seen_packets["ARP"].add(packet_key_ARP)
 
-        # Affichage des informations ARP
         print(Fore.WHITE + Style.BRIGHT + '-' * 50)
         print(Fore.WHITE + Style.BRIGHT + f"[+] Detected ARP {op_type}")
         print(Fore.YELLOW + Style.BRIGHT + f"[*] ARP {op_type} for IP: " + Fore.WHITE + Style.BRIGHT + ip_src)
