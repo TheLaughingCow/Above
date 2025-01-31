@@ -1,6 +1,9 @@
 # Find the stable main project here https://github.com/casterbyte/Above.
 # This one is a development project for my own personal use.
 
+### Personal modifications to this project target the display of duplicates and the use of specific flags such as --CDP or --LLMNR.
+
+
 
 # Above
 
@@ -24,6 +27,7 @@ Codename: Introvert
 
 **It is a specialized network security tool that helps both pentesters and security professionals**.
 
+
 ---
 
 # Mechanics
@@ -34,7 +38,7 @@ Above is a invisible network sniffer for finding vulnerabilities in network equi
 
 ## Supported protocols
 
-Detects up to 27 protocols:
+Detects up to 29 protocols:
 
 ```
 MACSec (802.1X AE)
@@ -64,6 +68,8 @@ DHCPv6 (Dynamic Host Configuration Protocol v6)
 ICMPv6 (Internet Control Message Protocol v6)
 SSDP (Simple Service Discovery Protocol)
 MNDP (MikroTik Neighbor Discovery Protocol)
+SNMP (Simple Network Management Protocol)
+RADIUS (Remote Authentication Dial-In User Service)
 ```
 ## Operating Mechanism
 
@@ -83,7 +89,7 @@ The tool is very simple in its operation and is driven by arguments:
 ```
 usage: above.py [-h] [--interface INTERFACE] [--timer TIMER] [--output OUTPUT] [--input INPUT] [--passive-arp] [--MACSec] [--EAPOL] [--ARP] [--CDP] [--DTP] [--LLDP] [--VLAN] [--S7COMM]
                 [--OMRON] [--TACACS] [--ModbusTCP] [--STP] [--OSPF] [--EIGRP] [--BGP] [--VRRP] [--VRRPv3] [--HSRP] [--GLBP] [--IGMP] [--LLMNR] [--NBT_NS] [--MDNS] [--DHCP] [--DHCPv6]
-                [--ICMPv6] [--SSDP] [--MNDP]
+                [--ICMPv6] [--SSDP] [--MNDP] [--RADIUS] [--SNMP]
 
 options:
   -h, --help            show this help message and exit
@@ -127,7 +133,7 @@ Or...
 
 ```bash
 caster@kali:~$ sudo apt-get install python3-scapy python3-colorama python3-setuptools
-caster@kali:~$ git clone https://github.com/casterbyte/Above
+caster@kali:~$ git clone https://github.com/TheLaughingCow/Above
 caster@kali:~$ cd Above/
 caster@kali:~/Above$ sudo python3 setup.py install
 ```
@@ -140,7 +146,7 @@ brew install python3
 sudo pip3 install scapy colorama setuptools
 
 # Clone the repo
-git clone https://github.com/casterbyte/Above
+git clone https://github.com/TheLaughingCow/Above
 cd Above/
 sudo python3 setup.py install
 ```
@@ -259,6 +265,40 @@ caster@kali:~$ sudo above --interface eth0 --passive-arp --timer 10
 [*] MAC Address: 00:0c:29:c5:82:81
 --------------------------------------------------
 ```
+
+
+
+# Tagg specific flag like CDP
+```bash
+caster@kali:~$ sudo above --interface eth0 --CDP
+
+--------------------------------------------------
+[+] Detected CDP Frame
+[*] Attack Impact: Information Gathering, CDP Flood
+[*] Tools: Wireshark, Yersinia
+[*] Platform: T46S
+[*] IP Address: 192.168.200.18
+[*] Mac: 80:5e:c0:5d:3f:9d
+[*] Hostname: T46S805EC05DAF9D
+[*] OS Version: 66.86.0.15
+[*] Port ID: WAN PORT
+[*] CDP Neighbor MAC: Unknown
+[*] Mitigation: Disable CDP if not required, be careful with VoIP
+--------------------------------------------------
+[+] Detected CDP Frame
+[*] Attack Impact: Information Gathering, CDP Flood
+[*] Tools: Wireshark, Yersinia
+[*] Platform: T48S
+[*] IP Address: 192.168.200.2
+[*] Mac: 80:5e:c0:78:e9:6d
+[*] Hostname: T48S805EC078E66D
+[*] OS Version: 66.86.0.15
+[*] Port ID: WAN PORT
+[*] CDP Neighbor MAC: Unknown
+[*] Mitigation: Disable CDP if not required, be careful with VoIP
+--------------------------------------------------
+```
+
 
 # Outro
 
