@@ -1,7 +1,7 @@
 # Find the stable main project here https://github.com/casterbyte/Above.
 # This one is a development project for my own personal use.
 
-### Personal modifications to this project target the display of duplicates and the use of specific flags such as --CDP or --LLMNR.
+* /!\ The personal changes made to this project concern the removal of duplicates in the display and the use of specific flags such as --CDP or --LLMNR.
 
 
 
