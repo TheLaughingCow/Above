@@ -58,6 +58,8 @@ seen_packets = {
     "OMRON": set(),
     "S7COMM": set(),
     "TACACS": set(),
+    "RADIUS": set(),
+    "SNMP": set(),
 }
 
 # pcap parsing, cold mode
@@ -921,7 +923,6 @@ def packet_detection(packet, args):
         print(Fore.WHITE + Style.BRIGHT + "[+] Source TCP Port: " + Fore.WHITE + Style.BRIGHT + source_port)
         print(Fore.WHITE + Style.BRIGHT + "[+] Destination TCP Port: " + Fore.WHITE + Style.BRIGHT + dest_port)
 
-
     if args.TACACS and packet.haslayer(TacacsHeader):
         header = packet[TacacsHeader]
         packet_key_TACACS = str(header)
@@ -946,6 +947,122 @@ def packet_detection(packet, args):
         mac_src = packet.getlayer(Ether).src if packet.haslayer(Ether) else 'Unknown'
         print(Fore.GREEN + Style.BRIGHT + "[*] Source MAC: " + Fore.WHITE + Style.BRIGHT + mac_src)
         print(Fore.CYAN + Style.BRIGHT + "[*] Mitigation: " + Fore.WHITE + Style.BRIGHT + "Use strong passwords, monitor unusual activities")
+
+    if args.RADIUS and packet.haslayer(UDP) and packet[UDP].dport in [1812, 1813, 1645, 1646]:
+        try:
+
+            source_ip = packet[IP].src if packet.haslayer(IP) else packet[IPv6].src if packet.haslayer(IPv6) else "Unknown"
+            dest_ip = packet[IP].dst if packet.haslayer(IP) else packet[IPv6].dst if packet.haslayer(IPv6) else "Unknown"
+
+            source_mac = packet[Ether].src if packet.haslayer(Ether) else "Unknown"
+            dest_mac = packet[Ether].dst if packet.haslayer(Ether) else "Unknown"
+
+            source_port = str(packet[UDP].sport) if packet.haslayer(UDP) else "Unknown"
+            dest_port = str(packet[UDP].dport) if packet.haslayer(UDP) else "Unknown"
+
+            if not packet.haslayer(Radius):
+                print(Fore.YELLOW + "[!] Warning: Packet on RADIUS port but no RADIUS layer detected")
+                return
+
+            radius_layer = packet[Radius]
+            radius_code = getattr(radius_layer, "code", "Unknown")
+            radius_id = getattr(radius_layer, "id", "Unknown")
+            authenticator = getattr(radius_layer, "authenticator", None)
+
+            packet_key_RADIUS = f"{source_ip}-{source_mac}-{source_port}-{radius_code}-{radius_id}"
+            if packet_key_RADIUS in seen_packets["RADIUS"]:
+                return
+
+            seen_packets["RADIUS"].add(packet_key_RADIUS)
+
+            radius_codes = {
+                1: "Access-Request", 2: "Access-Accept", 3: "Access-Reject", 4: "Accounting-Request",
+                5: "Accounting-Response", 11: "Access-Challenge", 26: "NAS-Reboot-Request", 27: "NAS-Reboot-Response",
+                40: "Disconnect-Request", 41: "Disconnect-ACK", 42: "Disconnect-NAK", 43: "CoA-Request",
+                44: "CoA-ACK", 45: "CoA-NAK", 50: "IP-Address-Allocate", 51: "IP-Address-Release"
+            }
+            radius_code_desc = radius_codes.get(radius_code, "Unknown Code")
+
+            print(Fore.WHITE + Style.BRIGHT + '-' * 50)
+            print(Fore.WHITE + Style.BRIGHT + "[+] Detected RADIUS Packet")
+            print(Fore.GREEN + Style.BRIGHT + f"[*] Source IP: {Fore.WHITE + source_ip}")
+            print(Fore.GREEN + Style.BRIGHT + f"[*] Destination IP: {Fore.WHITE + dest_ip}")
+            print(Fore.GREEN + Style.BRIGHT + f"[*] Source MAC: {Fore.WHITE + source_mac}")
+            print(Fore.GREEN + Style.BRIGHT + f"[*] Destination MAC: {Fore.WHITE + dest_mac}")
+            print(Fore.GREEN + Style.BRIGHT + f"[*] Source Port: {Fore.WHITE + source_port}")
+            print(Fore.GREEN + Style.BRIGHT + f"[*] Destination Port: {Fore.WHITE + dest_port}")
+            print(Fore.GREEN + Style.BRIGHT + f"[*] RADIUS Code: {Fore.WHITE + str(radius_code)} ({radius_code_desc})")
+            print(Fore.GREEN + Style.BRIGHT + f"[*] RADIUS Identifier: {Fore.WHITE + str(radius_id)}")
+
+            if authenticator:
+                print(Fore.GREEN + Style.BRIGHT + f"[*] RADIUS Authenticator: {Fore.WHITE + authenticator.hex()}")
+            else:
+                print(Fore.YELLOW + Style.BRIGHT + "[!] No Authenticator found")
+
+            for attr in getattr(radius_layer, "iterpayloads", lambda: [])():
+                attr_name = getattr(attr, 'name', f"Attribute {getattr(attr, 'type', 'Unknown')}")
+                attr_value = attr.fields.get("value", "Not Found")
+                print(Fore.GREEN + Style.BRIGHT + f"[*] {attr_name}: {Fore.WHITE + str(attr_value)}")
+
+            if packet.haslayer(RadiusAttr_User_Password):
+                encrypted_password = packet[RadiusAttr_User_Password].value
+                print(Fore.YELLOW + Style.BRIGHT + "[!] User Password (encrypted): " + Fore.WHITE + encrypted_password.hex())
+            else:
+                print(Fore.YELLOW + Style.BRIGHT + "[!] User Password: Not Present")
+
+            if packet.haslayer(RadiusAttr_Vendor_Specific):
+                vendor_id = packet[RadiusAttr_Vendor_Specific].vendor_id
+                vendor_map = {311: "Microsoft", 9: "Cisco", 11: "Hewlett-Packard", 18: "Merit", 14179: "Juniper"}
+                vendor_name = vendor_map.get(vendor_id, f"Unknown Vendor (ID: {vendor_id})")
+                vendor_data = packet[RadiusAttr_Vendor_Specific].value
+
+                print(Fore.GREEN + Style.BRIGHT + "[*] Vendor-Specific Information:")
+                print(Fore.GREEN + Style.BRIGHT + f"      Vendor Name: {vendor_name}")
+                print(Fore.GREEN + Style.BRIGHT + f"      Data: {vendor_data.hex() if isinstance(vendor_data, bytes) else vendor_data}")
+
+            print(Fore.CYAN + Style.BRIGHT + "[*] Mitigation: " + Fore.WHITE + "Use strong passwords, monitor unusual activities")
+
+        except Exception as e:
+            print(Fore.RED + Style.BRIGHT + f"[ERROR] RADIUS packet processing failed: {e}")
+
+    if args.SNMP and packet.haslayer(UDP) and packet[UDP].dport == 161:
+
+        try:
+            ip_src = packet[IP].src if packet.haslayer(IP) else packet[IPv6].src if packet.haslayer(IPv6) else "Unknown"
+            ip_dst = packet[IP].dst if packet.haslayer(IP) else packet[IPv6].dst if packet.haslayer(IPv6) else "Unknown"
+
+            community_string = str(packet[SNMP].community) if packet.haslayer(SNMP) else "Unknown"
+
+            packet_key_SNMP = f"{ip_src}-{ip_dst}-{community_string}"
+
+            if packet_key_SNMP in seen_packets["SNMP"]:
+                return
+
+            seen_packets["SNMP"].add(packet_key_SNMP)
+
+            print(Fore.WHITE + Style.BRIGHT + '-' * 50)
+            print(Fore.WHITE + Style.BRIGHT + "[+] Detected SNMP Packet")
+            print(Fore.GREEN + Style.BRIGHT + "[*] Attack Impact: " + Fore.YELLOW + Style.BRIGHT + "Information Gathering")
+            print(Fore.GREEN + Style.BRIGHT + "[*] Tools: " + Fore.WHITE + Style.BRIGHT + "snmpwalk, snmpget, snmp_enum, onesixtyone")
+            print(Fore.GREEN + Style.BRIGHT + f"[*] Source IP: {Fore.WHITE + ip_src}")
+            print(Fore.GREEN + Style.BRIGHT + f"[*] Destination IP: {Fore.WHITE + ip_dst}")
+            print(Fore.GREEN + Style.BRIGHT + f"[*] SNMP Community String: {Fore.WHITE + community_string}")
+
+            if community_string.lower() in ["public", "private"]:
+                print(Fore.YELLOW + Style.BRIGHT + "[!] Warning: Default SNMP community string used ('public' or 'private'). This is a security risk!")
+
+            if packet.haslayer(SNMP):
+                snmp_layer = packet[SNMP]
+                if hasattr(snmp_layer, "PDU"):
+                    for varbind in getattr(snmp_layer.PDU, "varbindlist", []):
+                        oid = varbind.oid.val if hasattr(varbind, "oid") else "Unknown OID"
+                        value = varbind.val.val if hasattr(varbind, "val") else "Unknown Value"
+                        print(Fore.GREEN + Style.BRIGHT + f"[*] SNMP Query: OID {Fore.WHITE + oid} → Value: {Fore.WHITE + str(value)}")
+
+            print(Fore.CYAN + Style.BRIGHT + "[*] Mitigation: " + Fore.WHITE + Style.BRIGHT + "Restrict SNMP access, use strong community strings, monitor SNMP traffic")
+
+        except Exception as e:
+            print(Fore.RED + Style.BRIGHT + f"[ERROR] SNMP packet processing failed: {e}")
 
 # list for packets processing
 packets = []
@@ -997,6 +1114,8 @@ def main():
     parser.add_argument('--ICMPv6', action='store_true', help='Capture ICMPv6 packets')
     parser.add_argument('--SSDP', action='store_true', help='Capture SSDP packets')
     parser.add_argument('--MNDP', action='store_true', help='Capture MNDP packets')
+    parser.add_argument('--SNMP', action='store_true', help='Capture SNMP packets')
+    parser.add_argument('--RADIUS', action='store_true', help='Capture RADIUS packets')
 
     args = parser.parse_args()
 
@@ -1015,7 +1134,7 @@ def main():
     all_flags = [
         'MACSec', 'EAPOL', 'ARP', 'CDP', 'DTP', 'LLDP', 'VLAN', 'S7COMM', 'OMRON', 'TACACS', 'ModbusTCP', 'STP',
         'OSPF', 'EIGRP', 'BGP', 'VRRP', 'VRRPv3', 'HSRP', 'GLBP', 'IGMP', 'LLMNR', 'NBT_NS', 'MDNS', 'DHCP',
-        'DHCPv6', 'ICMPv6', 'SSDP', 'MNDP'
+        'DHCPv6', 'ICMPv6', 'SSDP', 'MNDP', 'SNMP', 'RADIUS'
     ]
 
     if not any(getattr(args, flag) for flag in all_flags):
