@@ -1,7 +1,9 @@
 # Find the stable main project here https://github.com/casterbyte/Above.
 # This one is a development project for my own personal use.
 
-* /!\ The personal changes made to this project concern the removal of duplicates in the display and the use of specific flags such as --CDP or --LLMNR.
+* /!\ The personal changes made to this project concern :
+** Removal of duplicates in the display. A package already displayed will be ignored.
+** The use of specific flags such as --CDP or --LLMNR. This will only display selected packet.
 
 
 
