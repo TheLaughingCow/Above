@@ -3,7 +3,7 @@
 
 * /!\ The personal changes made to this project concern :
   
-* Removal of duplicates in the display. A package already displayed will be ignored.
+* Removal of duplicates in the display. A packet already displayed will be ignored.
 * The use of specific flags such as --CDP or --LLMNR. This will only display selected packet.
 
 
