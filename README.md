@@ -137,22 +137,7 @@ toto@kali:~$ source venv/bin/activate
 toto@kali:~$ pip install -r requirements.txt
 ```
 
-### macOS:
-```bash
-# Install python3 first
-brew install python3
-# Then install required dependencies
-sudo pip3 install scapy colorama setuptools
-
-# Clone the repo
-git clone https://github.com/TheLaughingCow/Above
-cd Above/
-sudo python3 setup.py install
-```
-
-Don't forget to **deactivate** your firewall on macOS!
-#### Settings > Network > Firewall
---------------------------
+---
 
 # How to Use
 
