@@ -127,18 +127,14 @@ When Above detects a protocol, it outputs the necessary information to indicate 
 # Installation
 
 ### Linux
-You can install Above directly from the Kali Linux repositories
 ```bash
-caster@kali:~$ sudo apt update && sudo apt install above
-```
-
-Or...
-
-```bash
-caster@kali:~$ sudo apt-get install python3-scapy python3-colorama python3-setuptools
-caster@kali:~$ git clone https://github.com/TheLaughingCow/Above
-caster@kali:~$ cd Above/
-caster@kali:~/Above$ sudo python3 setup.py install
+toto@kali:~$ git clone https://github.com/TheLaughingCow/Above
+toto@kali:~$ cd Above/
+toto@kali:~/Above$ sudo python3 setup.py install
+toto@kali:~$ sudo apt install python3-venv
+toto@kali:~$ python3 -m venv venv
+toto@kali:~$ source venv/bin/activate
+toto@kali:~$ pip install -r requirements.txt
 ```
 
 ### macOS:
@@ -167,7 +163,7 @@ Don't forget to **deactivate** your firewall on macOS!
 Above can be run with or without a timer:
 
 ```bash
-caster@kali:~$ sudo above --interface eth0 --timer 120
+toto@kali:~$ sudo above --interface eth0 --timer 120
 ```
 > To stop traffic sniffing, press CTRL + С
 >
@@ -176,7 +172,7 @@ caster@kali:~$ sudo above --interface eth0 --timer 120
 Example:
 
 ```bash
-caster@kali:~$ sudo above --interface eth0 --timer 120
+toto@kali:~$ sudo above --interface eth0 --timer 120
 
 -----------------------------------------------------------------------------------------
 [+] Start sniffing...
@@ -204,7 +200,7 @@ caster@kali:~$ sudo above --interface eth0 --timer 120
 If you need to record the sniffed traffic, use the `--output` argument
 
 ```bash
-caster@kali:~$ sudo above --interface eth0 --timer 120 --output above.pcap
+toto@kali:~$ sudo above --interface eth0 --timer 120 --output above.pcap
 ```
 > If you interrupt the tool with CTRL+C, the traffic is still written to the file
 
@@ -213,13 +209,13 @@ caster@kali:~$ sudo above --interface eth0 --timer 120 --output above.pcap
 If you already have some recorded traffic, you can use the `--input` argument to look for potential security issues
 
 ```bash
-caster@kali:~$ above --input ospf-md5.cap
+toto@kali:~$ above --input ospf-md5.cap
 ```
 
 Example:
 
 ```bash
-caster@kali:~$ sudo above --input ospf-md5.cap
+toto@kali:~$ sudo above --input ospf-md5.cap
 
 [+] Analyzing pcap file...
 
@@ -254,7 +250,7 @@ caster@kali:~$ sudo above --input ospf-md5.cap
 The tool can detect hosts without noise in the air by processing ARP frames in passive mode
 
 ```bash
-caster@kali:~$ sudo above --interface eth0 --passive-arp --timer 10
+toto@kali:~$ sudo above --interface eth0 --passive-arp --timer 10
 
 [+] Host discovery using Passive ARP
 
@@ -273,7 +269,7 @@ caster@kali:~$ sudo above --interface eth0 --passive-arp --timer 10
 
 # Tagg specific flag like CDP
 ```bash
-caster@kali:~$ sudo above --interface eth0 --CDP
+toto@kali:~$ sudo above --interface eth0 --CDP
 
 --------------------------------------------------
 [+] Detected CDP Frame
